@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -37,6 +38,7 @@ import com.satyamthakur.bio_guardian.ui.navigation.BottomEndpoints
 import com.satyamthakur.bio_guardian.ui.navigation.Endpoints
 import com.satyamthakur.bio_guardian.ui.screens.AnimalIdentifiedScreen
 import com.satyamthakur.bio_guardian.ui.screens.BioGuardianAppHomeScreen
+import com.satyamthakur.bio_guardian.ui.screens.MistralScreen
 import com.satyamthakur.bio_guardian.ui.screens.UploadImageScreen
 import com.satyamthakur.bio_guardian.ui.theme.BioGuardianTheme
 import com.satyamthakur.bio_guardian.ui.theme.accentColor
@@ -50,20 +52,25 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             BioGuardianTheme {
-                val homeScreenNavController = rememberNavController()
-
-                NavHost(
-                    navController = homeScreenNavController,
-                    startDestination = Endpoints.DASHBOARD
+//                val homeScreenNavController = rememberNavController()
+//
+//                NavHost(
+//                    navController = homeScreenNavController,
+//                    startDestination = Endpoints.DASHBOARD
+//                ) {
+//                    composable(Endpoints.DASHBOARD) {
+//                        Dashboard(
+//                            homeScreenNavController = homeScreenNavController
+//                        )
+//                    }
+//                    composable(Endpoints.ANIMAL_DESC) {
+//                        AnimalIdentifiedScreen(navController = homeScreenNavController)
+//                    }
+//                }
+                Column(
+                    modifier = Modifier.padding(16.dp)
                 ) {
-                    composable(Endpoints.DASHBOARD) {
-                        Dashboard(
-                            homeScreenNavController = homeScreenNavController
-                        )
-                    }
-                    composable(Endpoints.ANIMAL_DESC) {
-                        AnimalIdentifiedScreen(navController = homeScreenNavController)
-                    }
+                    MistralScreen()
                 }
             }
         }
