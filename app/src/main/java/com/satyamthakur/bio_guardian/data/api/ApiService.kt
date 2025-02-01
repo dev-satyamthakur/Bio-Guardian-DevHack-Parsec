@@ -31,7 +31,7 @@ interface ImagePredictionApiService {
 interface MistralImageRecognitionApi {
     @Headers(
         "Content-Type: application/json",
-        "Authorization: Bearer API_KEY"
+        "Authorization: Bearer API"
     )
     @POST("v1/chat/completions")
     suspend fun getChatCompletion(@Body request: MistralRequest): Response<MistralResponse>

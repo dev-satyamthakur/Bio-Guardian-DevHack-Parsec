@@ -16,7 +16,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.google.gson.Gson
+import com.satyamthakur.bio_guardian.ui.screens.AnimalNotFoundScreen
 import com.satyamthakur.bio_guardian.ui.viewmodel.MistralViewModel
 
 fun parseAnimalDetails(rawResponse: String): AnimalDetails? {
@@ -37,16 +39,17 @@ fun parseAnimalDetails(rawResponse: String): AnimalDetails? {
 }
 
 @Composable
-fun MistralScreen(imageUrl: String) {
+fun MistralScreen(imageUrl: String, animalName: String, navController: NavController) {
     val viewModel: MistralViewModel = hiltViewModel()
     val mistralResponse by viewModel.mistralResponse.collectAsState()
     val errorMessage by viewModel.error.collectAsState()
     val isLoading by viewModel.loading.collectAsState()
 
     // Fetch animal info when imageUrl changes or screen appears
-    LaunchedEffect(imageUrl) {
-        viewModel.fetchAnimalInfo(imageUrl)
+    LaunchedEffect(imageUrl, animalName) {
+        viewModel.fetchAnimalInfo(imageUrl, animalName)
     }
+
 
     Column(
         modifier = Modifier
@@ -77,20 +80,26 @@ fun MistralScreen(imageUrl: String) {
                 val rawResponse = mistralResponse?.choices?.firstOrNull()?.message?.content ?: ""
                 val animalDetails = parseAnimalDetails(rawResponse)
 
+                Log.d("BIOAPP", animalDetails.toString())
 
-                val sampleData = AnimalDetails(
-                    species = "Giant Panda",
-                    scientificName = "Ailuropoda melanoleuca",
-                    habitat = "Mountain forests in central China",
-                    diet = "Herbivorous, primarily bamboo",
-                    lifespan = "20-30 years in wild",
-                    sizeWeight = "1.5m long, 80-140 kg",
-                    reproduction = "3-5 month gestation",
-                    behavior = "Solitary animals",
-                    conservationStatus = "Vulnerable",
-                    specialAdaptations = "Pseudo-thumbs for bamboo"
-                )
-                AnimalDetailGrid(animalDetails = animalDetails ?: sampleData)
+                if (animalDetails != null && animalDetails.species == "not found") {
+                    Log.d("BIOAPP", "ANIMAL NOT FOUND")
+                    AnimalNotFoundScreen(navController)
+                } else {
+                    val sampleData = AnimalDetails(
+                        species = "Giant Panda",
+                        scientificName = "Ailuropoda melanoleuca",
+                        habitat = "Mountain forests in central China",
+                        diet = "Herbivorous, primarily bamboo",
+                        lifespan = "20-30 years in wild",
+                        sizeWeight = "1.5m long, 80-140 kg",
+                        reproduction = "3-5 month gestation",
+                        behavior = "Solitary animals",
+                        conservationStatus = "Vulnerable",
+                        specialAdaptations = "Pseudo-thumbs for bamboo"
+                    )
+                    AnimalDetailGrid(animalDetails = animalDetails ?: sampleData)
+                }
             }
             errorMessage != null -> Text("Error: $errorMessage", color = MaterialTheme.colorScheme.error)
         }

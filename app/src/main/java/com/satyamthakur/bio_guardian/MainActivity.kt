@@ -47,6 +47,7 @@ import com.satyamthakur.bio_guardian.ui.theme.accentColor
 import com.satyamthakur.bio_guardian.ui.theme.onAccent
 import dagger.hilt.android.AndroidEntryPoint
 import java.net.URLDecoder
+import java.net.URLEncoder
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -69,20 +70,24 @@ class MainActivity : ComponentActivity() {
 
                     // Define the route with a parameter for imageUrl
                     composable(
-                        route = "${Endpoints.ANIMAL_DESC}/{imageUrl}",
+                        route = "${Endpoints.ANIMAL_DESC}/{imageUrl}/{animalName}",
                         arguments = listOf(
-                            navArgument("imageUrl") { type = NavType.StringType }
+                            navArgument("imageUrl") { type = NavType.StringType },
+                            navArgument("animalName") { type = NavType.StringType }
                         )
                     ) { backStackEntry ->
                         // Retrieve the imageUrl argument
                         val encodedImageUrl  = backStackEntry.arguments?.getString("imageUrl") ?: ""
+                        val encodedAnimalName = backStackEntry.arguments?.getString("animalName") ?: ""
                         // Pass it to the AnimalIdentifiedScreen
                         val imageUrl = URLDecoder.decode(encodedImageUrl, "UTF-8");
+                        val animalName = URLDecoder.decode(encodedAnimalName, "UTF-8")
                         Log.d("BIOAPP", "Decoded URL : $imageUrl")
 
                         AnimalIdentifiedScreen(
                             navController = homeScreenNavController,
-                            imageUrl = imageUrl
+                            imageUrl = imageUrl,
+                            animalName = animalName
                         )
                     }
                 }

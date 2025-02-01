@@ -28,10 +28,15 @@ import com.satyamthakur.bio_guardian.ui.theme.md_theme_light_onTertiaryContainer
 @Composable
 fun AnimalIdentifiedScreen(
     navController: NavController,
-    imageUrl: String = "https://cdn.download.ams.birds.cornell.edu/api/v2/asset/612763581/900"
+    imageUrl: String = "https://cdn.download.ams.birds.cornell.edu/api/v2/asset/612763581/900",
+    animalName: String?
 ) {
 
-        MistralScreen(imageUrl = imageUrl)
+        if (animalName != "") {
+            MistralScreen(imageUrl = imageUrl, animalName!!, navController)
+        } else {
+            MistralScreen(imageUrl = imageUrl, "", navController)
+        }
 
 }
 
