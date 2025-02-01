@@ -1,6 +1,7 @@
 package com.satyamthakur.bio_guardian
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -30,20 +31,22 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.satyamthakur.bio_guardian.ui.model.BottomNavigationItem
 import com.satyamthakur.bio_guardian.ui.navigation.BottomEndpoints
 import com.satyamthakur.bio_guardian.ui.navigation.Endpoints
 import com.satyamthakur.bio_guardian.ui.screens.AnimalIdentifiedScreen
 import com.satyamthakur.bio_guardian.ui.screens.BioGuardianAppHomeScreen
-import com.satyamthakur.bio_guardian.ui.screens.MistralScreen
 import com.satyamthakur.bio_guardian.ui.screens.UploadImageScreen
 import com.satyamthakur.bio_guardian.ui.theme.BioGuardianTheme
 import com.satyamthakur.bio_guardian.ui.theme.accentColor
 import com.satyamthakur.bio_guardian.ui.theme.onAccent
 import dagger.hilt.android.AndroidEntryPoint
+import java.net.URLDecoder
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -52,26 +55,38 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             BioGuardianTheme {
-//                val homeScreenNavController = rememberNavController()
-//
-//                NavHost(
-//                    navController = homeScreenNavController,
-//                    startDestination = Endpoints.DASHBOARD
-//                ) {
-//                    composable(Endpoints.DASHBOARD) {
-//                        Dashboard(
-//                            homeScreenNavController = homeScreenNavController
-//                        )
-//                    }
-//                    composable(Endpoints.ANIMAL_DESC) {
-//                        AnimalIdentifiedScreen(navController = homeScreenNavController)
-//                    }
-//                }
-                Column(
-                    modifier = Modifier.padding(16.dp)
+                val homeScreenNavController = rememberNavController()
+
+                NavHost(
+                    navController = homeScreenNavController,
+                    startDestination = Endpoints.DASHBOARD
                 ) {
-                    MistralScreen()
+                    composable(Endpoints.DASHBOARD) {
+                        Dashboard(
+                            homeScreenNavController = homeScreenNavController
+                        )
+                    }
+
+                    // Define the route with a parameter for imageUrl
+                    composable(
+                        route = "${Endpoints.ANIMAL_DESC}/{imageUrl}",
+                        arguments = listOf(
+                            navArgument("imageUrl") { type = NavType.StringType }
+                        )
+                    ) { backStackEntry ->
+                        // Retrieve the imageUrl argument
+                        val encodedImageUrl  = backStackEntry.arguments?.getString("imageUrl") ?: ""
+                        // Pass it to the AnimalIdentifiedScreen
+                        val imageUrl = URLDecoder.decode(encodedImageUrl, "UTF-8");
+                        Log.d("BIOAPP", "Decoded URL : $imageUrl")
+
+                        AnimalIdentifiedScreen(
+                            navController = homeScreenNavController,
+                            imageUrl = imageUrl
+                        )
+                    }
                 }
+
             }
         }
     }

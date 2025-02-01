@@ -8,4 +8,5 @@ object BottomEndpoints {
 object Endpoints {
     val DASHBOARD = "DASHBOARD"
     val ANIMAL_DESC = "ANIMAL_DESCRIPTION"
+    val MISTRAL_SCREEN = "MISTRAL_SCREEN"
 }

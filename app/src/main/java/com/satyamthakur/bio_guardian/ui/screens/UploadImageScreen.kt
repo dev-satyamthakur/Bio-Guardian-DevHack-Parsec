@@ -57,6 +57,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.net.URLEncoder
 import java.util.UUID
 
 @Composable
@@ -89,6 +90,34 @@ fun UploadImageScreenTitle() {
 }
 
 
+//suspend fun uploadImageToGCS(
+//    context: Context,
+//    imageUri: Uri,
+//    imageName: String,
+//    bucketName: String
+//) {
+//    withContext(Dispatchers.IO) {
+//        try {
+//            val file = File(getPathFromUri(context, imageUri))
+//
+//            val storage = getStorageCredentials(context).service
+//
+//            val blobId = BlobId.of(bucketName.trim(), "images/$imageName.jpg")
+//            val blobInfo = BlobInfo.newBuilder(blobId)
+//                .setContentType("image/jpeg") // Set MIME type
+//                .setContentDisposition("inline") // Allow inline viewing
+//                .build()
+//
+//            file.inputStream().use { inputStream ->
+//                storage.create(blobInfo, inputStream.readBytes())
+//                Log.d("GCS Upload", "Image uploaded successfully")
+//            }
+//        } catch (e: Exception) {
+//            Log.e("GCS Upload", "Upload failed", e)
+//        }
+//    }
+//}
+
 suspend fun uploadImageToGCS(
     context: Context,
     imageUri: Uri,
@@ -97,18 +126,22 @@ suspend fun uploadImageToGCS(
 ) {
     withContext(Dispatchers.IO) {
         try {
-            val file = File(getPathFromUri(context, imageUri))
+            val inputStream = context.contentResolver.openInputStream(imageUri)
+            if (inputStream == null) {
+                Log.e("GCS Upload", "Failed to open InputStream from Uri")
+                return@withContext
+            }
 
             val storage = getStorageCredentials(context).service
 
             val blobId = BlobId.of(bucketName.trim(), "images/$imageName.jpg")
             val blobInfo = BlobInfo.newBuilder(blobId)
-                .setContentType("image/jpeg") // Set MIME type
-                .setContentDisposition("inline") // Allow inline viewing
+                .setContentType("image/jpeg")
+                .setContentDisposition("inline")
                 .build()
 
-            file.inputStream().use { inputStream ->
-                storage.create(blobInfo, inputStream.readBytes())
+            inputStream.use { stream ->
+                storage.create(blobInfo, stream.readBytes())
                 Log.d("GCS Upload", "Image uploaded successfully")
             }
         } catch (e: Exception) {
@@ -243,17 +276,18 @@ fun SelectAnImageCardWithHeading(navController: NavController) {
                         try {
                             val bucketName = "bio-guardian-image-bucket".trim()
                             val fileName = UUID.randomUUID().toString()
-                            val imageUrlIfSuccess = "https://storage.googleapis.com/bio-guardian-image-bucket/images/$fileName.jpg"
+                            val imageUrlIfSuccessfullyUploaded = "https://storage.googleapis.com/bio-guardian-image-bucket/images/$fileName.jpg"
 
                             uploadImageToGCS(context, imageUri!!, fileName, bucketName)
-                            Log.d("BIOAPP", imageUrlIfSuccess)
+                            Log.d("BIOAPP", imageUrlIfSuccessfullyUploaded)
 
                             // Reset after successful upload
                             imageUri = null
                             isImageUploading = false
 
                             // Navigate to next screen
-                            navController.navigate(Endpoints.ANIMAL_DESC)
+                            val imageUrl = URLEncoder.encode(imageUrlIfSuccessfullyUploaded, "UTF-8")
+                            navController.navigate("${Endpoints.ANIMAL_DESC}/${imageUrl}")
                         } catch (e: Exception) {
                             Log.e("BIOAPP", "Upload process error", e)
                             isImageUploading = false

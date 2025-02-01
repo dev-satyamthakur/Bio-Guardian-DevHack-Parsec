@@ -1,60 +1,97 @@
-package com.satyamthakur.bio_guardian.ui.screens
-
+import android.util.Log
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.gson.Gson
 import com.satyamthakur.bio_guardian.ui.viewmodel.MistralViewModel
 
+fun parseAnimalDetails(rawResponse: String): AnimalDetails? {
+    return try {
+        // Clean up the response
+        val cleanedJson = rawResponse
+            .replace("```json", "")
+            .replace("```", "")
+            .trimIndent()
+            .trim()
+
+        // Parse with Gson
+        Gson().fromJson(cleanedJson, AnimalDetails::class.java)
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
+}
+
 @Composable
-fun MistralScreen(viewModel: MistralViewModel = viewModel()) {
-    var imageUrl by remember { mutableStateOf("https://storage.googleapis.com/bio-guardian-image-bucket/images/ab613058-154b-41d3-83db-aadcd979cb38.jpg") }
+fun MistralScreen(imageUrl: String) {
+    val viewModel: MistralViewModel = hiltViewModel()
     val mistralResponse by viewModel.mistralResponse.collectAsState()
     val errorMessage by viewModel.error.collectAsState()
     val isLoading by viewModel.loading.collectAsState()
+
+    // Fetch animal info when imageUrl changes or screen appears
+    LaunchedEffect(imageUrl) {
+        viewModel.fetchAnimalInfo(imageUrl)
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        OutlinedTextField(
-            value = imageUrl,
-            onValueChange = { imageUrl = it },
-            label = { Text("Enter Image URL") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = { viewModel.fetchAnimalInfo(imageUrl) },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Get Animal Info")
-        }
-
         Spacer(modifier = Modifier.height(16.dp))
 
         when {
-            isLoading -> CircularProgressIndicator()
-            mistralResponse != null -> Text("Response: ${mistralResponse?.choices?.firstOrNull()?.message?.content ?: "No response"}")
+            isLoading -> {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally, // Center horizontally
+                    verticalArrangement = Arrangement.Center // Center vertically
+                ) {
+                    CircularProgressIndicator()
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Checking Animal Details...")
+                }
+
+            }
+            mistralResponse != null -> {
+                Log.d("BIOAPP RESPONSE", "${mistralResponse?.choices?.firstOrNull()?.message?.content ?: "No response"}")
+//                Text("Response: ${mistralResponse?.choices?.firstOrNull()?.message?.content ?: "No response"}")
+
+                val rawResponse = mistralResponse?.choices?.firstOrNull()?.message?.content ?: ""
+                val animalDetails = parseAnimalDetails(rawResponse)
+
+
+                val sampleData = AnimalDetails(
+                    species = "Giant Panda",
+                    scientificName = "Ailuropoda melanoleuca",
+                    habitat = "Mountain forests in central China",
+                    diet = "Herbivorous, primarily bamboo",
+                    lifespan = "20-30 years in wild",
+                    sizeWeight = "1.5m long, 80-140 kg",
+                    reproduction = "3-5 month gestation",
+                    behavior = "Solitary animals",
+                    conservationStatus = "Vulnerable",
+                    specialAdaptations = "Pseudo-thumbs for bamboo"
+                )
+                AnimalDetailGrid(animalDetails = animalDetails ?: sampleData)
+            }
             errorMessage != null -> Text("Error: $errorMessage", color = MaterialTheme.colorScheme.error)
         }
     }

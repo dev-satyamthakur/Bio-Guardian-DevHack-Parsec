@@ -1,5 +1,6 @@
 package com.satyamthakur.bio_guardian.ui.screens
 
+import MistralScreen
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
@@ -26,15 +27,11 @@ import com.satyamthakur.bio_guardian.ui.theme.md_theme_light_onTertiaryContainer
 
 @Composable
 fun AnimalIdentifiedScreen(
-    navController: NavController
+    navController: NavController,
+    imageUrl: String = "https://cdn.download.ams.birds.cornell.edu/api/v2/asset/612763581/900"
 ) {
 
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
-
-        AnimalDetails(navController)
-    }
+        MistralScreen(imageUrl = imageUrl)
 
 }
 
