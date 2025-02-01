@@ -23,7 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.satyamthakur.bio_guardian.R
@@ -31,26 +30,39 @@ import com.satyamthakur.bio_guardian.ui.theme.Montserrat
 import com.satyamthakur.bio_guardian.ui.theme.md_theme_light_onTertiaryContainer
 import com.satyamthakur.bio_guardian.ui.theme.md_theme_light_tertiaryContainer
 
-val exploreTitles = listOf(
+private val exploreTitles = listOf(
     "Nearby\nReserves", "Conservation\nEfforts"
 )
 
 @Composable
 fun ExploreMoreSection() {
-    Text(
-        modifier = Modifier.padding(horizontal = 16.dp),
-        text = "Explore More",
-        fontFamily = Montserrat,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 20.sp,
-        color = md_theme_light_onTertiaryContainer
-    )
-    Spacer(modifier = Modifier.height(10.dp))
-    Row(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        ExploreMoreCard(title = exploreTitles[0], index = 0, modifier = Modifier.weight(1f).padding(start = 16.dp, top = 10.dp, end = 5.dp))
-        ExploreMoreCard(title = exploreTitles[1], index = 1, modifier = Modifier.weight(1f).padding(end = 16.dp, top = 10.dp, start = 5.dp))
+    Column {
+        Text(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            text = "Explore More",
+            fontFamily = Montserrat,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 20.sp,
+            color = md_theme_light_onTertiaryContainer
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            exploreTitles.forEachIndexed { index, title ->
+                ExploreMoreCard(
+                    title = title,
+                    index = index,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(
+                            start = if (index == 0) 16.dp else 5.dp,
+                            end = if (index == 1) 16.dp else 5.dp,
+                            top = 10.dp
+                        )
+                )
+            }
+        }
     }
 }
 
@@ -58,24 +70,29 @@ fun ExploreMoreSection() {
 @Composable
 fun ExploreMoreCard(title: String, index: Int, modifier: Modifier) {
     val context = LocalContext.current
-    val conservationEffortsIntent = remember { Intent(Intent.ACTION_VIEW, Uri.parse("https://www.worldwildlife.org/initiatives/wildlife-conservation")) }
+    val conservationEffortsIntent = remember {
+        Intent(
+            Intent.ACTION_VIEW,
+            Uri.parse("https://www.worldwildlife.org/initiatives/wildlife-conservation")
+        )
+    }
     Card(
         modifier = modifier,
         colors = CardDefaults.cardColors(
             containerColor = md_theme_light_tertiaryContainer,
         ),
         onClick = {
-            if (index == 0) {
-                val gmmIntentUri = Uri.parse("geo:0,0?q=natural%20reserves")
-                val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
-                mapIntent.setPackage("com.google.android.apps.maps")
-                context.startActivity(mapIntent)
-            }
-            else if (index == 1) {
-                context.startActivity(conservationEffortsIntent)
+            when (index) {
+                0 -> {
+                    val gmmIntentUri = Uri.parse("geo:0,0?q=natural%20reserves")
+                    val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri).apply {
+                        setPackage("com.google.android.apps.maps")
+                    }
+                    context.startActivity(mapIntent)
+                }
+                1 -> context.startActivity(conservationEffortsIntent)
             }
         }
-
     ) {
         Column(
             modifier = Modifier
@@ -101,16 +118,4 @@ fun ExploreMoreCard(title: String, index: Int, modifier: Modifier) {
             )
         }
     }
-}
-
-@Preview()
-@Composable
-fun PrevExplore() {
-    ExploreMoreCard("Nearby\nReserves", 0, Modifier)
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PrevExploreMoreSection() {
-    ExploreMoreSection()
 }
