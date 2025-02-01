@@ -75,7 +75,7 @@ fun EndangeredAnimalItemCard(
         ),
         modifier = Modifier,
         onClick = {
-            val penguin = "https://i.natgeofe.com/k/09db0b0a-9ca5-47de-93a8-00bbb9a3a50d/ADULTS_CHINSTRAP_PENGUIN-PROFILES_KIDS_0123.jpg?wp=1&w=1084.125&h=929.25"
+            val penguin = animal.imageLink
             val encodedPenguin = URLEncoder.encode(penguin, "UTF-8")
             val encodedAnimalName = URLEncoder.encode(animal.name, "UTF-8")
             navController.navigate("${Endpoints.ANIMAL_DESC}/$encodedPenguin/$encodedAnimalName")

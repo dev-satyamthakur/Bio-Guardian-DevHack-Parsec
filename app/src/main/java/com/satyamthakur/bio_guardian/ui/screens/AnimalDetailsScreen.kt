@@ -12,11 +12,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
 import com.google.gson.annotations.SerializedName
 
 data class AnimalDetails(
@@ -96,11 +100,44 @@ fun HalfWidthTilesRow(
 }
 
 @Composable
-fun AnimalDetailGrid(animalDetails: AnimalDetails) {
+fun AnimalDetailGrid(animalDetails: AnimalDetails, imageUrl: String) {
     LazyColumn(
         modifier = Modifier.padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        item {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                tonalElevation = 1.dp,
+                shadowElevation = 2.dp
+            ) {
+                SubcomposeAsyncImage(
+                    model = imageUrl,
+                    contentDescription = "Image of ${animalDetails.species}",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(350.dp)
+                        .clip(RoundedCornerShape(16.dp)),
+                    contentScale = ContentScale.Fit,
+                    loading = {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(48.dp),
+                                color = MaterialTheme.colorScheme.secondary,
+                                strokeWidth = 4.dp
+                            )
+                        }
+                    }
+                )
+            }
+        }
+
         // Header tiles (Species and Scientific Name) in a row
         item {
             HalfWidthTilesRow(
@@ -291,6 +328,6 @@ fun AnimalDetailGridPreview() {
             specialAdaptations = "Pseudo-thumbs for bamboo"
         )
 
-        AnimalDetailGrid(animalDetails = sampleData)
+        AnimalDetailGrid(animalDetails = sampleData, "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Aptenodytes_forsteri_-Snow_Hill_Island%2C_Antarctica_-adults_and_juvenile-8.jpg/800px-Aptenodytes_forsteri_-Snow_Hill_Island%2C_Antarctica_-adults_and_juvenile-8.jpg")
     }
 }

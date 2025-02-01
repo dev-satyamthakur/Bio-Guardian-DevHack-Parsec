@@ -1,10 +1,17 @@
 import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -14,9 +21,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
+import coil.compose.rememberImagePainter
 import com.google.gson.Gson
 import com.satyamthakur.bio_guardian.ui.screens.AnimalNotFoundScreen
 import com.satyamthakur.bio_guardian.ui.viewmodel.MistralViewModel
@@ -69,7 +80,7 @@ fun MistralScreen(imageUrl: String, animalName: String, navController: NavContro
                 ) {
                     CircularProgressIndicator()
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Checking Animal Details...")
+                    Text("Fetching Details...")
                 }
 
             }
@@ -98,7 +109,15 @@ fun MistralScreen(imageUrl: String, animalName: String, navController: NavContro
                         conservationStatus = "Vulnerable",
                         specialAdaptations = "Pseudo-thumbs for bamboo"
                     )
-                    AnimalDetailGrid(animalDetails = animalDetails ?: sampleData)
+
+
+                        AnimalDetailGrid(
+                            animalDetails = animalDetails ?: sampleData,
+                            imageUrl = imageUrl
+                            // Add horizontal padding
+                        )
+
+
                 }
             }
             errorMessage != null -> Text("Error: $errorMessage", color = MaterialTheme.colorScheme.error)
